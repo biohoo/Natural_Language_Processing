@@ -2,9 +2,16 @@
 From https://pythonprogramming.net/text-classification-nltk-tutorial/
 '''
 
+import os
 import nltk
 import random
 from nltk.corpus import movie_reviews
+import pickle
+
+from nltk.classify.scikitlearn import SklearnClassifier
+from sklearn.naive_bayes import MultinomialNB,BernoulliNB
+from sklearn.linear_model import LogisticRegression,SGDClassifier
+from sklearn.svm import SVC, LinearSVC, NuSVC
 
 documents = [(list(movie_reviews.words(fileid)), category)
              for category in movie_reviews.categories()
@@ -51,3 +58,21 @@ print("Classifier accuracy percent:",(nltk.classify.accuracy(classifier, testing
 
 classifier.show_most_informative_features(15)
 
+os.chdir('classifiers')
+with open(f'naivebayes.pickle', 'wb') as f:
+    pickle.dump(classifier, f)
+
+
+classifiers_dict = {'Multinomial Naive Bayes': SklearnClassifier(MultinomialNB()),
+'Bernoulli Naive Bayes': SklearnClassifier(BernoulliNB()),
+'Logistic Regression Classifier': SklearnClassifier(LogisticRegression()),
+'Stochastic Gradient Descent Classifier': SklearnClassifier(SGDClassifier()),
+'Support Vector Curve Classifier': SklearnClassifier(SVC()),
+'Linear Support Vector Curve Classifier': SklearnClassifier(LinearSVC()),
+'Nu SVC Classifier': SklearnClassifier(NuSVC())}
+
+for name, wrapped_classifier in classifiers_dict.items():
+    wrapped_classifier.train(training_set)
+    print(f'{name} percent: {(nltk.classify.accuracy(wrapped_classifier, testing_set))*100}')
+    with open(f'{name}.pickle', 'wb') as f:
+        pickle.dump(wrapped_classifier, f)
